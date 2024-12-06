@@ -1,9 +1,11 @@
-
 import cv2
 import numpy as np
 
-# Load the model
+# Deep Neural Network object detection with pre trained "MobileNetSSD" model
+
+# prototxt file defining the archietecture and parameters of deep learning model in the caffe framework
 prototxt = "deploy.prototxt"
+# trained weights and biases of neural network
 model = "mobilenet_iter_73000.caffemodel"
 net = cv2.dnn.readNetFromCaffe(prototxt, model)
 
