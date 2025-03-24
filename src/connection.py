@@ -3,32 +3,37 @@ import socketio
 from dotenv import load_dotenv
 import os
 import time
+import asyncio
+from pathlib import Path
 
-load_dotenv("../.env")
+async def run_client():
+  env_path = Path(__file__).resolve.parent.parent / ".env"
+  load_dotenv(env_path)
+  sio = socketio.AsyncClient()
 
-sio = socketio.Client()
 
-
-SERVER_URL=f"ws://{os.getenv('INDEX_ADDRESS')}:{os.getenv('PORT')}"
+  SERVER_URL=f"ws://{os.getenv('INDEX_ADDRESS')}:{os.getenv('PORT')}"
 
 # define event handlers for events from server
-def connect():
-  print("Connected to websocket server")
-  sio.emit("message", "I connected")
+  async def connect():
+    print("Connected to websocket server")
+    await sio.emit("message", "I connected")
 
-def disconnect():
-  print("Disconnecting from websocket server")
+  async def disconnect():
+    print("Disconnecting from websocket server")
 
-def message(data):
-  print(f"Message from Server: {data}")
+  async def message(data):
+    print(f"Message from Server: {data}")
 
-sio.on("connect", connect)
-sio.on("disconnect", disconnect)
-sio.on("message", message)
+  sio.on("connect", connect)
+  sio.on("disconnect", disconnect)
+  sio.on("message", message)
 
-try:
-  sio.connect(SERVER_URL)
-  time.sleep(3)
-  sio.disconnect()
-except Exception as e:
-  print(f"Connection failed X_X: {e} {SERVER_URL}")
+
+  try:
+    await sio.connect(SERVER_URL)
+    await sio.wait()
+  except Exception as e:
+    print(f"Connection failed X_X: {e} {SERVER_URL}")
+
+
