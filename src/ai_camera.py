@@ -13,5 +13,4 @@ def run_ai_camera(queue):
   
   while True:
     frame = picam2.capture_array()
-    # print(frame)
     queue.put(frame)

@@ -1,8 +1,15 @@
-from picamera2 import Picamera2
-import time
+import smbus
 
-picam2 = Picamera2()
-picam2.configure(picam2.preview_configuration)
-picam2.start()
-time.sleep(2)
-picam2.start_and_record_video("test.mp4", duration=5)
+# Bus 10 since it shows 'UU' for the camera
+bus = smbus.SMBus(10)
+
+# Address of the camera (commonly 0x69)
+address = 0x69
+
+try:
+  # Read a byte to test communication
+  data = bus.read_byte(address)
+  print(f"Device found at 0x{address:02X}, data: {data}")
+except Exception as e:
+  print(f"Error communicating with device: {e}")
+
