@@ -9,7 +9,7 @@ import base64
 from pathlib import Path
 
 
-async def run_client(ai_queue, temp_queue):
+async def run_client(ai_queue, temp_queue, cpu_temp_queue):
 
   env_path = Path(__file__).resolve().parent.parent/ ".env"
   load_dotenv(env_path)
@@ -68,7 +68,17 @@ async def run_client(ai_queue, temp_queue):
         await sio.emit("temp",[temperature, humidity])
       await asyncio.sleep(3)
 
+  async def send_cpu_temp():
+    while True:
+      if cpu_temp_queue.qsize() > 0:
+        temp = cpu_temp_queue.get()
+        await sio.emit("cpu_temp",temp/1000)
+      await asyncio.sleep(3)
+
+
+
   SERVER_URL=f"ws://{os.getenv('INDEX_ADDRESS')}:{os.getenv('PORT')}"
+
 
 # define event handlers for events from server
   async def connect():
@@ -76,6 +86,7 @@ async def run_client(ai_queue, temp_queue):
     await sio.emit("message", "I connected")
     asyncio.create_task(send_frames_ai())
     asyncio.create_task(send_temp())
+    asyncio.create_task(send_cpu_temp())
 
   async def disconnect():
     print("Disconnecting from websocket server")
