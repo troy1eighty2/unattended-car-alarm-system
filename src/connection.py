@@ -75,6 +75,15 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue):
         await sio.emit("cpu_temp",temp/1000)
       await asyncio.sleep(3)
 
+  async def send_runtime():
+    time = 0
+    while True:
+      time = time + 1
+      print(time)
+      await sio.emit("uptime", time)
+      await asyncio.sleep(1)
+
+
 
 
   SERVER_URL=f"ws://{os.getenv('INDEX_ADDRESS')}:{os.getenv('PORT')}"
@@ -87,6 +96,8 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue):
     asyncio.create_task(send_frames_ai())
     asyncio.create_task(send_temp())
     asyncio.create_task(send_cpu_temp())
+    asyncio.create_task(send_runtime())
+      
 
   async def disconnect():
     print("Disconnecting from websocket server")
