@@ -6,7 +6,7 @@ def run_cpu_temperature(queue):
   while True:
     with open("/sys/class/thermal/thermal_zone0/temp", "r") as file:
       temp_str = file.read().strip()
-      print(temp_str)
-      queue.put(float(temp_str))
+      temp_f =(float(temp_str) * (9/5)) + 32
+      queue.put(temp_f)
     time.sleep(2) 
   

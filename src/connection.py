@@ -25,54 +25,29 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue):
           frame_b64 = base64.b64encode(buffer.tobytes()).decode("utf-8")
           await sio.emit("frame", frame_b64)
         await asyncio.sleep(.01)
-
-  async def send_frames_thermal():
-    while True:
-      if thermal_queue.qsize() > 0:
-        # get from queue
-        frame = thermal_queue.get()
-
-
-        # reshape + normalize
-        thermal_data = np.reshape(frame, (24,32))
-        normalized_data = np.interp(thermal_data, (thermal_data.min(), thermal_data.max()), (0, 255))
-
-        # convert to grayscale
-        thermal_frame = np.uint8(normalized_data)
-
-        # resize
-        resized_frame = cv2.resize(thermal_frame, (640, 480), interpolation=cv2.INTER_CUBIC)
-        # apply colormap
-        colored_frame = cv2.applyColorMap(resized_frame, cv2.COLORMAP_INFERNO)
-
-
-        success, buffer = cv2.imencode(".jpg", colored_frame)
-        if success:
-          # encode base64
-          frame_b64 = base64.b64encode(buffer.tobytes()).decode("utf-8")
-          await sio.emit("frame_thermal", frame_b64)
-        await asyncio.sleep(.01)
   
   async def send_temp():
     while True:
       if temp_queue.qsize() > 0:
         temp = temp_queue.get()
-        temperature = temp[0]
-        humidity = temp[1]
+        T = round(((temp[0] * (9/5)) + 32),2)
+        RH = temp[1]
+        heat_index = -42.379 + 2.04901523*T + 10.14333127*RH - .22475541*T*RH - .00683783*T*T - .05481717*RH*RH + .00122874*T*T*RH + .00085282*T*RH*RH - .00000199*T*T*RH*RH
+        heat_index = round(heat_index, 2)
         print("---")
-        print(temp)
-        print(temperature)
-        print(humidity)
+        print(T)
+        print(RH)
+        print(heat_index)
         print("---")
 
-        await sio.emit("temp",[temperature, humidity])
+        await sio.emit("temp",[T, RH, heat_index])
       await asyncio.sleep(3)
 
   async def send_cpu_temp():
     while True:
       if cpu_temp_queue.qsize() > 0:
         temp = cpu_temp_queue.get()
-        await sio.emit("cpu_temp",temp/1000)
+        await sio.emit("cpu_temp",round((temp/1000),2))
       await asyncio.sleep(3)
 
   async def send_runtime():
@@ -82,8 +57,6 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue):
       print(time)
       await sio.emit("uptime", time)
       await asyncio.sleep(1)
-
-
 
 
   SERVER_URL=f"ws://{os.getenv('INDEX_ADDRESS')}:{os.getenv('PORT')}"

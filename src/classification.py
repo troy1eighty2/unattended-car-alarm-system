@@ -95,27 +95,28 @@ def draw_classification_results(request: CompletedRequest, results: List[Classif
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
 
-def get_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=str, help="Path of the model",
-                        default="/usr/share/imx500-models/imx500_network_mobilenet_v2.rpk")
-    parser.add_argument("--fps", type=int, help="Frames per second")
-    parser.add_argument("-s", "--softmax", action=argparse.BooleanOptionalAction, help="Add post-process softmax")
-    parser.add_argument("-r", "--preserve-aspect-ratio", action=argparse.BooleanOptionalAction,
-                        help="preprocess the image with preserve aspect ratio")
-    parser.add_argument("--labels", type=str,
-                        help="Path to the labels file")
-    parser.add_argument("--print-intrinsics", action="store_true",
-                        help="Print JSON network_intrinsics then exit")
-    return parser.parse_args()
+#def get_args():
+#    """Parse command line arguments."""
+#    parser = argparse.ArgumentParser()
+#    parser.add_argument("--model", type=str, help="Path of the model",
+#                        default="/usr/share/imx500-models/imx500_network_mobilenet_v2.rpk")
+#    parser.add_argument("--fps", type=int, help="Frames per second")
+#    parser.add_argument("-s", "--softmax", action=argparse.BooleanOptionalAction, help="Add post-process softmax")
+#    parser.add_argument("-r", "--preserve-aspect-ratio", action=argparse.BooleanOptionalAction,
+#                        help="preprocess the image with preserve aspect ratio")
+#    parser.add_argument("--labels", type=str,
+#                        help="Path to the labels file")
+#    parser.add_argument("--print-intrinsics", action="store_true",
+#                        help="Print JSON network_intrinsics then exit")
+#    return parser.parse_args()
 
 
 def run_classification(queue):
-    args = get_args()
+    #args = get_args()
 
     # This must be called before instantiation of Picamera2
-    imx500 = IMX500(args.model)
+    #imx500 = IMX500(args.model)
+    imx500 = IMX500("/usr/share/imx500-models/imx500_network_mobilenet_v2.rpk")
     intrinsics = imx500.network_intrinsics
     if not intrinsics:
         intrinsics = NetworkIntrinsics()
@@ -125,22 +126,27 @@ def run_classification(queue):
         exit()
 
     # Override intrinsics from args
-    for key, value in vars(args).items():
-        if key == 'labels' and value is not None:
-            with open(value, 'r') as f:
-                intrinsics.labels = f.read().splitlines()
-        elif hasattr(intrinsics, key) and value is not None:
-            setattr(intrinsics, key, value)
+#    for key, value in vars(args).items():
+#        if key == 'labels' and value is not None:
+#            with open(value, 'r') as f:
+#                intrinsics.labels = f.read().splitlines()
+#        elif hasattr(intrinsics, key) and value is not None:
+#            setattr(intrinsics, key, value)
+    
+    intrinsics.labels = []
 
     # Defaults
     if intrinsics.labels is None:
+        print("----")
+        print("default")
+        print("----")
         with open("assets/imagenet_labels.txt", "r") as f:
             intrinsics.labels = f.read().splitlines()
     intrinsics.update_with_defaults()
 
-    if args.print_intrinsics:
-        print(intrinsics)
-        exit()
+    #if args.print_intrinsics:
+    #    print(intrinsics)
+    #    exit()
 
     print("[Starting] AI camera")
     print("[Online] AI camera")

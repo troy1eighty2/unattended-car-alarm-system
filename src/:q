@@ -2,7 +2,6 @@
 import smtplib, ssl
 from email.message import EmailMessage
 from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 
 def run_sms():
@@ -11,14 +10,9 @@ def run_sms():
   msg["From"] = "troytran000@gmail.com"
   msg["To"] = "troytran000@gmail.com"
 
-  txt = f"""\
-  ⚠️⚠️⚠️⚠️⚠️ Subjects detected in your car ⚠️⚠️⚠️⚠️⚠️
-  
-  Did you forget to check your rear passenger seat?
-
-
-
-  """
+  txt = """\
+  test
+  this is a test"""
 
   html = """\
   <html>
@@ -35,14 +29,9 @@ def run_sms():
 
   part1 = MIMEText(txt, "plain")
   part2 = MIMEText(html, "html")
-  with open("", "rb") as f:
-    img = MIMEImage(f.read())
-    img.add_header("Content-Disposition", "attachment", filename="")
-    msg.attach(img)
 
   msg.attach(part1)
   msg.attach(part2)
-  msg.attach(img)
 
   context = ssl.create_default_context()
   with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
