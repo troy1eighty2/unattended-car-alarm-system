@@ -69,16 +69,21 @@ def get_labels():
     return labels
 
 
-def draw_detections(jobs):
+def draw_detections(jobs, ai_queue):
     global imx500
     global picam2
     """Draw the detections for this request onto the ISP output."""
     labels = get_labels()
     # Wait for result from child processes in the order submitted.
     last_detections = []
-    while (job := jobs.get()) is not None:
+    while True:
+        job = jobs.get()
+        if job is None:
+          continue
         request, async_result = job
         #detections = async_result.get()
+        if request is None or "main" not in request.stream_map:
+          continue
         detections = async_result
         if detections is None:
             detections = last_detections
@@ -114,20 +119,15 @@ def draw_detections(jobs):
               cv2.rectangle(m.array, (x, y), (x + w, y + h), (0, 255, 0), thickness=2)
               frame = m.array.copy()
               print(frame)
+              ai_queue.put(frame)
 
-        if intrinsics.preserve_aspect_ratio:
-            b_x, b_y, b_w, b_h = imx500.get_roi_scaled(request)
-            color = (255, 0, 0)  # red
-            cv2.putText(m.array, "ROI", (b_x + 5, b_y + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-            cv2.rectangle(m.array, (b_x, b_y), (b_x + b_w, b_y + b_h), (255, 0, 0, 0))
+        #if intrinsics.preserve_aspect_ratio:
+        #    b_x, b_y, b_w, b_h = imx500.get_roi_scaled(request)
+        #    color = (255, 0, 0)  # red
+        #    cv2.putText(m.array, "ROI", (b_x + 5, b_y + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+        #    cv2.rectangle(m.array, (b_x, b_y), (b_x + b_w, b_y + b_h), (255, 0, 0, 0))
 
         #cv2.imshow('IMX500 Object Detection', m.array)
-
-def draw_detection(job):
-  labels = get_labels()
-  last_detections = []
-
-
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -165,7 +165,7 @@ def run_detection(ai_queue):
         max_detections=10,
         fps=5,                                                                                                                    
         preserve_aspect_ratio=False,                                                                                               
-        labels="assets/imagenet_labels.txt",                                                                                      
+        labels="assets/coco_labels.txt",                                                                                      
         print_intrinsics=False                                                                                                    
     ) 
 
@@ -215,7 +215,7 @@ def run_detection(ai_queue):
 
     #pool = multiprocessing.Pool(processes=4)
     jobs = queue.Queue()
-    thread = threading.Thread(target=draw_detections, args=(jobs,))
+    thread = threading.Thread(target=draw_detections, args=(jobs, ai_queue,))
     thread.start()
 
     print("break 8")
@@ -230,5 +230,7 @@ def run_detection(ai_queue):
             jobs.put((request, detections))
             request.release()
         else:
+            frame = picam2.capture_array()
+            ai_queue.put(frame)
             request.release()
 #run_detection()
