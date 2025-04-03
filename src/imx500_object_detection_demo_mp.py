@@ -55,6 +55,7 @@ def parse_detections(metadata: dict):
         for box, score, category in zip(boxes, scores, classes)
         if score > threshold
     ]
+    
     return detections
 
 
@@ -69,55 +70,63 @@ def get_labels():
 
 
 def draw_detections(jobs):
+    global imx500
+    global picam2
     """Draw the detections for this request onto the ISP output."""
     labels = get_labels()
     # Wait for result from child processes in the order submitted.
     last_detections = []
     while (job := jobs.get()) is not None:
         request, async_result = job
-        detections = async_result.get()
+        #detections = async_result.get()
+        detections = async_result
         if detections is None:
             detections = last_detections
         last_detections = detections
         with MappedArray(request, 'main') as m:
-            for detection in detections:
-                x, y, w, h = detection.box
-                label = f"{labels[int(detection.category)]} ({detection.conf:.2f})"
+          for detection in detections:
+              x, y, w, h = detection.box
+              label = f"{labels[int(detection.category)]} ({detection.conf:.2f})"
 
-                # Calculate text size and position
-                (text_width, text_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-                text_x = x + 5
-                text_y = y + 15
+              # Calculate text size and position
+              (text_width, text_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+              text_x = x + 5
+              text_y = y + 15
 
-                # Create a copy of the array to draw the background with opacity
-                overlay = m.array.copy()
+              # Create a copy of the array to draw the background with opacity
+              overlay = m.array.copy()
 
-                # Draw the background rectangle on the overlay
-                cv2.rectangle(overlay,
-                              (text_x, text_y - text_height),
-                              (text_x + text_width, text_y + baseline),
-                              (255, 255, 255),  # Background color (white)
-                              cv2.FILLED)
+              # Draw the background rectangle on the overlay
+              cv2.rectangle(overlay,
+                            (text_x, text_y - text_height),
+                            (text_x + text_width, text_y + baseline),
+                            (255, 255, 255),  # Background color (white)
+                            cv2.FILLED)
 
-                alpha = 0.3
-                cv2.addWeighted(overlay, alpha, m.array, 1 - alpha, 0, m.array)
+              alpha = 0.3
+              cv2.addWeighted(overlay, alpha, m.array, 1 - alpha, 0, m.array)
 
-                # Draw text on top of the background
-                cv2.putText(m.array, label, (text_x, text_y),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+              # Draw text on top of the background
+              cv2.putText(m.array, label, (text_x, text_y),
+                          cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
-                # Draw detection box
-                cv2.rectangle(m.array, (x, y), (x + w, y + h), (0, 255, 0), thickness=2)
+              # Draw detection box
+              cv2.rectangle(m.array, (x, y), (x + w, y + h), (0, 255, 0), thickness=2)
+              frame = m.array.copy()
+              print(frame)
 
-            if intrinsics.preserve_aspect_ratio:
-                b_x, b_y, b_w, b_h = imx500.get_roi_scaled(request)
-                color = (255, 0, 0)  # red
-                cv2.putText(m.array, "ROI", (b_x + 5, b_y + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-                cv2.rectangle(m.array, (b_x, b_y), (b_x + b_w, b_y + b_h), (255, 0, 0, 0))
+        if intrinsics.preserve_aspect_ratio:
+            b_x, b_y, b_w, b_h = imx500.get_roi_scaled(request)
+            color = (255, 0, 0)  # red
+            cv2.putText(m.array, "ROI", (b_x + 5, b_y + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+            cv2.rectangle(m.array, (b_x, b_y), (b_x + b_w, b_y + b_h), (255, 0, 0, 0))
 
-            #cv2.imshow('IMX500 Object Detection', m.array)
-            cv2.waitKey(1)
-        request.release()
+        #cv2.imshow('IMX500 Object Detection', m.array)
+
+def draw_detection(job):
+  labels = get_labels()
+  last_detections = []
+
 
 
 def get_args():
@@ -142,7 +151,7 @@ def get_args():
 
 
 #if __name__ == "__main__":
-def run_detection(queue):
+def run_detection(ai_queue):
     #args = get_args()
 
     global imx500
@@ -155,7 +164,7 @@ def run_detection(queue):
         iou=0.65,
         max_detections=10,
         fps=5,                                                                                                                    
-        preserve_aspect_ratio=True,                                                                                               
+        preserve_aspect_ratio=False,                                                                                               
         labels="assets/imagenet_labels.txt",                                                                                      
         print_intrinsics=False                                                                                                    
     ) 
@@ -205,24 +214,21 @@ def run_detection(queue):
     print("break 7")
 
     #pool = multiprocessing.Pool(processes=4)
-    jobs = multiprocessing.Queue()
-
+    jobs = queue.Queue()
     thread = threading.Thread(target=draw_detections, args=(jobs,))
     thread.start()
+
     print("break 8")
 
     while True:
         print("break 9")
         request = picam2.capture_request()
 
-        frame = request.make_array("main")
-        #queue.put(frame)
-        print(frame)
-
         metadata = request.get_metadata()
         if metadata:
-            result = parse_detections(metadata)
-            #draw_detections(result)
+            detections = parse_detections(metadata)
+            jobs.put((request, detections))
+            request.release()
         else:
             request.release()
-run_detection(0)
+#run_detection()
