@@ -13,6 +13,7 @@ from picamera2.devices.imx500.postprocess import softmax
 
 last_detections = []
 LABELS = None
+imx500 = IMX500("/usr/share/imx500-models/imx500_network_mobilenet_v2.rpk")
 
 
 class Classification:
@@ -42,7 +43,7 @@ def parse_and_draw_classification_results(request: CompletedRequest):
 
 def parse_classification_results(request: CompletedRequest) -> List[Classification]:
     """Parse the output tensor into the classification results above the threshold."""
-    global last_detections
+    global last_detections, imx500
     np_outputs = imx500.get_outputs(request.get_metadata())
     if np_outputs is None:
         return last_detections
@@ -57,6 +58,7 @@ def parse_classification_results(request: CompletedRequest) -> List[Classificati
 
 def draw_classification_results(request: CompletedRequest, results: List[Classification], stream: str = "main"):
     """Draw the classification results for this request onto the ISP output."""
+
     with MappedArray(request, stream) as m:
         if intrinsics.preserve_aspect_ratio:
             # Drawing ROI box
@@ -116,7 +118,7 @@ def run_classification(queue):
 
     # This must be called before instantiation of Picamera2
     #imx500 = IMX500(args.model)
-    imx500 = IMX500("/usr/share/imx500-models/imx500_network_mobilenet_v2.rpk")
+    global imx500
     intrinsics = imx500.network_intrinsics
     if not intrinsics:
         intrinsics = NetworkIntrinsics()
@@ -133,7 +135,7 @@ def run_classification(queue):
 #        elif hasattr(intrinsics, key) and value is not None:
 #            setattr(intrinsics, key, value)
     
-    intrinsics.labels = []
+    #intrinsics.labels = []
 
     # Defaults
     if intrinsics.labels is None:
@@ -144,25 +146,25 @@ def run_classification(queue):
             intrinsics.labels = f.read().splitlines()
     intrinsics.update_with_defaults()
 
-    #if args.print_intrinsics:
-    #    print(intrinsics)
-    #    exit()
-
     print("[Starting] AI camera")
     print("[Online] AI camera")
 
+    print("break 1")
     picam2 = Picamera2(imx500.camera_num)
+    #picam2 = Picamera2()
     config = picam2.create_preview_configuration(controls={"FrameRate": intrinsics.inference_rate}, buffer_count=4)
 
-    # imx500.show_network_fw_progress_bar()
-    # picam2.start(config, show_preview=True)
-    picam2.start(config )
-    if intrinsics.preserve_aspect_ratio:
-        imx500.set_auto_aspect_ratio()
-    # Register the callback to parse and draw classification results
+    imx500.show_network_fw_progress_bar()
+    picam2.start(config, show_preview=True)
+    #picam2.start(config )
+    print("break 2")
+    #if intrinsics.preserve_aspect_ratio:
+    #    imx500.set_auto_aspect_ratio()
+    ## Register the callback to parse and draw classification results
     picam2.pre_callback = parse_and_draw_classification_results
+    print("break 3")
 
-    while True:
-        frame = picam2.capture_array()
-        queue.put(frame)
-        time.sleep(0.5)
+    #while True:
+    #    frame = picam2.capture_array()
+    #    queue.put(frame)
+    #    time.sleep(0.5)

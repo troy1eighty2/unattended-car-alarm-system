@@ -16,8 +16,8 @@ async def main():
   temperature_sensor = Process(target=run_temperature_sensor, args=(temp_queue,), daemon=True)
   cpu_temperature = Process(target=run_cpu_temperature, args=(cpu_temp_queue,), daemon=True)
 
-  ai_camera = Process(target=run_classification, args=(ai_queue,), daemon=True)
-  #ai_camera = Process(target=run_ai_camera, args=(ai_queue,), daemon=True)
+  #ai_camera = Process(target=run_classification, args=(ai_queue,), daemon=True)
+  ai_camera = Process(target=run_ai_camera, args=(ai_queue,), daemon=True)
 
   ai_camera.start()
   temperature_sensor.start()
