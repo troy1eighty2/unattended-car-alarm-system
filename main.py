@@ -6,8 +6,6 @@ from src.ai_camera import run_ai_camera
 from src.temperature_sensor import run_temperature_sensor
 from src.cpu_temperature import run_cpu_temperature
 
-from src.classification import run_classification
-
 async def main():
   ai_queue = Queue()
   temp_queue = Queue()
@@ -19,7 +17,7 @@ async def main():
   #ai_camera = Process(target=run_classification, args=(ai_queue,), daemon=True)
   ai_camera = Process(target=run_ai_camera, args=(ai_queue,), daemon=True)
 
-  ai_camera.start()
+  #ai_camera.start()
   temperature_sensor.start()
   cpu_temperature.start()
 

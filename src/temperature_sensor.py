@@ -5,7 +5,7 @@ import time
 # Initialize the DHT22 sensor (use the GPIO pin connected to the signal wire)
 def run_temperature_sensor(queue):
   print("[Starting] Temperature Sensor")
-  dht_device = adafruit_dht.DHT22(board.D26)  # GPIO4 (Pin 7 on Raspberry Pi)
+  dht_device = adafruit_dht.DHT22(board.D26)
   print("[Online] Temperature Sensor")
 
   try:

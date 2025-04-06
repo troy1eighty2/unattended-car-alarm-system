@@ -66,7 +66,7 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue):
   async def connect():
     print("Connected to websocket server")
     await sio.emit("message", "I connected")
-    asyncio.create_task(send_frames_ai())
+    #asyncio.create_task(send_frames_ai())
     asyncio.create_task(send_temp())
     asyncio.create_task(send_cpu_temp())
     asyncio.create_task(send_runtime())

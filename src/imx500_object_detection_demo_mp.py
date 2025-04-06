@@ -82,7 +82,7 @@ def draw_detections(jobs, ai_queue):
           continue
         request, async_result = job
         #detections = async_result.get()
-        if request is None or "main" not in request.stream_map:
+        if request is None or request.config is None:
           continue
         detections = async_result
         if detections is None:
@@ -120,6 +120,7 @@ def draw_detections(jobs, ai_queue):
               frame = m.array.copy()
               print(frame)
               ai_queue.put(frame)
+        request.release()
 
         #if intrinsics.preserve_aspect_ratio:
         #    b_x, b_y, b_w, b_h = imx500.get_roi_scaled(request)
@@ -163,7 +164,7 @@ def run_detection(ai_queue):
         threshold=0.55,
         iou=0.65,
         max_detections=10,
-        fps=5,                                                                                                                    
+        fps=60,                                                                                                                    
         preserve_aspect_ratio=False,                                                                                               
         labels="assets/coco_labels.txt",                                                                                      
         print_intrinsics=False                                                                                                    
@@ -228,7 +229,6 @@ def run_detection(ai_queue):
         if metadata:
             detections = parse_detections(metadata)
             jobs.put((request, detections))
-            request.release()
         else:
             frame = picam2.capture_array()
             ai_queue.put(frame)
