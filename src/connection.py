@@ -6,14 +6,18 @@ import time
 import asyncio
 import cv2
 import base64
+from datetime import datetime
 from pathlib import Path
+
+from src.sms import run_sms
 
 
 async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detections_queue, sys_info_queue):
-
   env_path = Path(__file__).resolve().parent.parent/ ".env"
   load_dotenv(env_path)
   sio = socketio.AsyncClient()
+  emergency = False
+  shutdown = False
 
   async def send_frames_ai():
     while True:
@@ -66,9 +70,13 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
         await asyncio.sleep(5)
 
   async def send_detections():
+    nonlocal emergency
     while True:
       if detections_queue.qsize() > 0:
         detections = detections_queue.get()
+        if detections:
+          emergency = True
+          shutdown = True
         await sio.emit("detections", detections)
         await asyncio.sleep(0.01)
 
@@ -81,7 +89,29 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
         await sio.emit("sys_info", [info[0], info[1]])
         await asyncio.sleep(5)
 
+  async def send_config():
+    await sio.emit("config", [os.getenv('LOCATION'), os.getenv('GPS_CONNECTION_STRENGTH')])
 
+  async def send_emergency():
+    while True:
+      if emergency:
+        break
+      await asyncio.sleep(0.01)
+    print("SUBJECT DETECTED")
+    picture = ai_queue.get()
+    temperature = temp_queue.get()
+    time = datetime.now().strftime("%M-%d-%Y %H:%M:%S")
+
+    print(picture)
+    print(temperature)
+    print(time)
+
+    await run_sms(picture, temperature, time)
+
+  
+    
+      
+      
 
   SERVER_URL=f"ws://{os.getenv('INDEX_ADDRESS')}:{os.getenv('PORT')}"
 
@@ -90,6 +120,7 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
   async def connect():
     print("Connected to websocket server")
     await sio.emit("message", "I connected")
+    await send_config()
     asyncio.create_task(send_frames_ai())
     asyncio.create_task(send_temp())
     asyncio.create_task(send_cpu_temp())
@@ -97,6 +128,7 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
     asyncio.create_task(send_wifi_strength())
     asyncio.create_task(send_detections())
     asyncio.create_task(send_sys_info())
+    asyncio.create_task(send_emergency())
       
 
   async def disconnect():
