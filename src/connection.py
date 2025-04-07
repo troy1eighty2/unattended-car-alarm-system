@@ -9,7 +9,7 @@ import base64
 from pathlib import Path
 
 
-async def run_client(ai_queue, temp_queue, cpu_temp_queue):
+async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detections_queue, sys_info_queue):
 
   env_path = Path(__file__).resolve().parent.parent/ ".env"
   load_dotenv(env_path)
@@ -48,7 +48,7 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue):
       if cpu_temp_queue.qsize() > 0:
         temp = cpu_temp_queue.get()
         await sio.emit("cpu_temp",round((temp/1000),2))
-      await asyncio.sleep(3)
+      await asyncio.sleep(5)
 
   async def send_runtime():
     time = 0
@@ -58,6 +58,30 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue):
       await sio.emit("uptime", time)
       await asyncio.sleep(1)
 
+  async def send_wifi_strength():
+    while True:
+      if wifi_queue.qsize() > 0:
+        strength = wifi_queue.get()
+        await sio.emit("wifi_strength", strength)
+        await asyncio.sleep(5)
+
+  async def send_detections():
+    while True:
+      if detections_queue.qsize() > 0:
+        detections = detections_queue.get()
+        await sio.emit("detections", detections)
+        await asyncio.sleep(0.01)
+
+  async def send_sys_info():
+    while True:
+      if sys_info_queue.qsize() > 0:
+        info = sys_info_queue.get()
+        print("test")
+        print(info)
+        await sio.emit("sys_info", [info[0], info[1]])
+        await asyncio.sleep(5)
+
+
 
   SERVER_URL=f"ws://{os.getenv('INDEX_ADDRESS')}:{os.getenv('PORT')}"
 
@@ -66,10 +90,13 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue):
   async def connect():
     print("Connected to websocket server")
     await sio.emit("message", "I connected")
-    #asyncio.create_task(send_frames_ai())
+    asyncio.create_task(send_frames_ai())
     asyncio.create_task(send_temp())
     asyncio.create_task(send_cpu_temp())
     asyncio.create_task(send_runtime())
+    asyncio.create_task(send_wifi_strength())
+    asyncio.create_task(send_detections())
+    asyncio.create_task(send_sys_info())
       
 
   async def disconnect():

@@ -1,5 +1,6 @@
 from multiprocessing import Process, Queue
 import time
+import psutil
 def run_cpu_temperature(queue):
   print("[Starting] CPU Temperature")
   print("[Online] CPU Temperature")

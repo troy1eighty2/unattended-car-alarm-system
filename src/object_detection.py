@@ -27,10 +27,14 @@ class Detection:
 def parse_detections(metadata: dict):
     """Parse the output tensor into a number of detected objects, scaled to the ISP output."""
     global args
+    global excluded_labels
+    global subject
+    global included_labels
     bbox_normalization = intrinsics.bbox_normalization
     threshold = args.threshold
     iou = args.iou
     max_detections = args.max_detections
+    labels = args.labels
 
     np_outputs = imx500.get_outputs(metadata, add_batch=True)
     input_w, input_h = imx500.get_input_size()
@@ -53,8 +57,13 @@ def parse_detections(metadata: dict):
     detections = [
         Detection(box, category, score, metadata)
         for box, score, category in zip(boxes, scores, classes)
-        if score > threshold
+        if score > threshold and int(category) < len(labels) and labels[int(category)] not in excluded_labels
     ]
+    
+    for det in detections:
+      if included_labels[int(det.category)] not in subject:
+        subject.append(included_labels[int(det.category)])
+      
     
     return detections
 
@@ -117,9 +126,10 @@ def draw_detections(jobs, ai_queue):
 
               # Draw detection box
               cv2.rectangle(m.array, (x, y), (x + w, y + h), (0, 255, 0), thickness=2)
-              frame = m.array.copy()
-              print(frame)
-              ai_queue.put(frame)
+              
+          frame = m.array.copy()
+          #print(frame)
+          ai_queue.put(frame)
         request.release()
 
         #if intrinsics.preserve_aspect_ratio:
@@ -152,16 +162,105 @@ def get_args():
 
 
 #if __name__ == "__main__":
-def run_detection(ai_queue):
+def run_detection(ai_queue, detection_queue):
     #args = get_args()
 
     global imx500
     global intrinsics
     global args
+    global included_labels
+    global excluded_labels
+    included_labels={
+      0: "person",
+      15: "bird",
+      16:"cat",
+      17:"dog",
+      18:"horse",
+      19:"sheep",
+      20:"cow",
+      21:"elephant",
+      22:"bear",
+      23:"zebra",
+      24:"giraffe",
+
+    }
+    excluded_labels= {
+      "bicycle",
+      "car",
+      "motorcycle",
+      "airplane",
+      "bus",
+      "train",
+      "truck",
+      "boat",
+      "traffic light",
+      "fire hydrant",
+      "stop sign",
+      "parking meter",
+      "bench",
+      "backpack",
+      "umbrella",
+      "handbag",
+      "tie",
+      "suitcase",
+      "frisbee",
+      "skis",
+      "snowboard",
+      "sports ball",
+      "kite",
+      "baseball bat",
+      "baseball glove",
+      "skateboard",
+      "surfboard",
+      "tennis racket",
+      "bottle",
+      "wine glass",
+      "cup",
+      "fork",
+      "knife",
+      "spoon",
+      "bowl",
+      "banana",
+      "apple",
+      "sandwich",
+      "orange",
+      "broccoli",
+      "carrot",
+      "hot dog",
+      "pizza",
+      "donut",
+      "cake",
+      "chair",
+      "couch",
+      "potted plant",
+      "bed",
+      "dining table",
+      "toilet",
+      "tv",
+      "laptop",
+      "mouse",
+      "remote",
+      "keyboard",
+      "cell phone",
+      "microwave",
+      "oven",
+      "toaster",
+      "sink",
+      "refrigerator",
+      "book",
+      "clock",
+      "vase",
+      "scissors",
+      "teddy bear",
+      "hair drier",
+      "toothbrush",
+    }
+    global subject
+    subject = []
     print("break 1")
     args = argparse.Namespace(                                                                                                  
         model="/usr/share/imx500-models/imx500_network_ssd_mobilenetv2_fpnlite_320x320_pp.rpk",                                                         
-        threshold=0.55,
+        threshold=0.75,
         iou=0.65,
         max_detections=10,
         fps=60,                                                                                                                    
@@ -222,7 +321,7 @@ def run_detection(ai_queue):
     print("break 8")
 
     while True:
-        print("break 9")
+        detection_queue.put(subject)
         request = picam2.capture_request()
 
         metadata = request.get_metadata()
@@ -230,7 +329,6 @@ def run_detection(ai_queue):
             detections = parse_detections(metadata)
             jobs.put((request, detections))
         else:
-            frame = picam2.capture_array()
-            ai_queue.put(frame)
+            #frame = picam2.capture_array()
+            #ai_queue.put(frame)
             request.release()
-#run_detection()
