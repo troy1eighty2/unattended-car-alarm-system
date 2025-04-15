@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 
 from src.sms import run_sms
-
+from src.history import run_write_json, run_update_json, run_package_json
 
 async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detections_queue, sys_info_queue):
   env_path = Path(__file__).resolve().parent.parent/ ".env"
@@ -98,15 +98,20 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
         break
       await asyncio.sleep(0.01)
     print("SUBJECT DETECTED")
+    detections = detections_queue.get()
     picture = ai_queue.get()
     temperature = temp_queue.get()
-    time = datetime.now().strftime("%M-%d-%Y %H:%M:%S")
+    T = round(((temperature[0] * (9/5)) + 32),2)
+    time = datetime.now().strftime("%m-%d-%Y %H:%M:%S")
+    newDoc = run_write_json(time, T, detections, [os.getenv('LOCATION')])
 
     print(picture)
     print(temperature)
     print(time)
 
-    await run_sms(picture, temperature, time)
+    await sio.emit("emergency", True)
+    run_sms(picture, temperature, time)
+    await sio.emit("history", newDoc)
 
   
     
@@ -121,6 +126,8 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
     print("Connected to websocket server")
     await sio.emit("message", "I connected")
     await send_config()
+    history_data = run_package_json()
+    await sio.emit("history", history_data)
     asyncio.create_task(send_frames_ai())
     asyncio.create_task(send_temp())
     asyncio.create_task(send_cpu_temp())
