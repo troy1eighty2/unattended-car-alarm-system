@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 
 from src.sms import run_sms
-from src.history import run_write_json, run_update_json, run_package_json
+from src.history import run_write_json, run_update_json, run_package_json, run_write_pictures, run_package_pictures
 
 async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detections_queue, sys_info_queue):
   env_path = Path(__file__).resolve().parent.parent/ ".env"
@@ -38,11 +38,6 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
         RH = temp[1]
         heat_index = -42.379 + 2.04901523*T + 10.14333127*RH - .22475541*T*RH - .00683783*T*T - .05481717*RH*RH + .00122874*T*T*RH + .00085282*T*RH*RH - .00000199*T*T*RH*RH
         heat_index = round(heat_index, 2)
-        print("---")
-        print(T)
-        print(RH)
-        print(heat_index)
-        print("---")
 
         await sio.emit("temp",[T, RH, heat_index])
       await asyncio.sleep(3)
@@ -84,8 +79,6 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
     while True:
       if sys_info_queue.qsize() > 0:
         info = sys_info_queue.get()
-        print("test")
-        print(info)
         await sio.emit("sys_info", [info[0], info[1]])
         await asyncio.sleep(5)
 
@@ -97,20 +90,26 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
       if emergency:
         break
       await asyncio.sleep(0.01)
+
     print("SUBJECT DETECTED")
     detections = detections_queue.get()
+
     picture = ai_queue.get()
+    success, buffer = cv2.imencode(".jpg", picture)
+    frame_b64 = base64.b64encode(buffer.tobytes()).decode("utf-8")
+
     temperature = temp_queue.get()
     T = round(((temperature[0] * (9/5)) + 32),2)
     time = datetime.now().strftime("%m-%d-%Y %H:%M:%S")
-    newDoc = run_write_json(time, T, detections, [os.getenv('LOCATION')])
 
-    print(picture)
-    print(temperature)
-    print(time)
+    newDoc = run_write_json(time, T, detections, [os.getenv('LOCATION')])
+    newPicture = run_write_pictures(time, frame_b64)
+
 
     await sio.emit("emergency", True)
     run_sms(picture, temperature, time)
+
+    await sio.emit("pictures", newPicture)
     await sio.emit("history", newDoc)
 
   
@@ -126,8 +125,12 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
     print("Connected to websocket server")
     await sio.emit("message", "I connected")
     await send_config()
+
     history_data = run_package_json()
+    pictures_data = run_package_pictures()
     await sio.emit("history", history_data)
+    await sio.emit("pictures", pictures_data)
+
     asyncio.create_task(send_frames_ai())
     asyncio.create_task(send_temp())
     asyncio.create_task(send_cpu_temp())
