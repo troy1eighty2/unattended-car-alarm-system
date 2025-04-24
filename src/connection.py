@@ -85,6 +85,9 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
   async def send_config():
     await sio.emit("config", [os.getenv('LOCATION'), os.getenv('GPS_CONNECTION_STRENGTH')])
 
+  async def countdown():
+    pass
+
   async def send_emergency():
     while True:
       if emergency:
@@ -94,20 +97,24 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
     print("SUBJECT DETECTED")
     detections = detections_queue.get()
 
+    print("DETECTIONS GRABBED")
     picture = ai_queue.get()
     success, buffer = cv2.imencode(".jpg", picture)
     frame_b64 = base64.b64encode(buffer.tobytes()).decode("utf-8")
 
+    print("PICTURE GRABBED")
     temperature = temp_queue.get()
     T = round(((temperature[0] * (9/5)) + 32),2)
     time = datetime.now().strftime("%m-%d-%Y %H:%M:%S")
 
+    print("TEMPERATURE GRABBED")
     newDoc = run_write_json(time, T, detections, [os.getenv('LOCATION')])
     newPicture = run_write_pictures(time, frame_b64)
 
 
+    print("PICTURE AND HISTORY WRITTEN")
     await sio.emit("emergency", True)
-    run_sms(picture, temperature, time)
+    run_sms(picture, T, time, detections)
 
     await sio.emit("pictures", newPicture)
     await sio.emit("history", newDoc)
