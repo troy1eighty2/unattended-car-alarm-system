@@ -1,21 +1,24 @@
 import json
 import aiofiles
 
-def run_update_json(timestamp, resolved, authorities):
+async def run_update_json(timestamp, resolved, authorities):
 
-  with open("data/history.json", "r") as f:
-    data = json.load(f)
+  filepath = "data/history.json"
 
-  for entry in data:
+  async with aiofiles.open(filepath, "r") as f:
+    contents = await f.read()
+    array = json.loads(contents)
+
+  for entry in array:
     if entry["timestamp"] == timestamp:
       entry["resolved"] = resolved
       entry["authorities"] = authorities
       break
 
-  with open("data/history.json", "w") as f:
-    json.dump(data, f, indent=2)
+  async with aiofiles.open(filepath, "w") as f:
+    await f.write(json.dumps(array, indent=2))
 
-  return data
+  return array
 
 async def run_write_json(timestamp, temperature, subjects, location):
   data = {

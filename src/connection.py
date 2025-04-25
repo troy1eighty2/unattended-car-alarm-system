@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#sudo lsof /dev/gpiochip*
 import socketio
 from dotenv import load_dotenv
 import os
@@ -6,11 +7,14 @@ import time
 import asyncio
 import cv2
 import base64
+import sys
 from datetime import datetime
 from pathlib import Path
 
 from src.sms import run_sms
 from src.history import run_write_json, run_update_json, run_package_json, run_write_pictures, run_package_pictures
+global time
+time = 0
 
 async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detections_queue, sys_info_queue):
   env_path = Path(__file__).resolve().parent.parent/ ".env"
@@ -86,13 +90,22 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
     await sio.emit("config", [os.getenv('LOCATION'), os.getenv('GPS_CONNECTION_STRENGTH')])
 
   async def countdown():
-    count =300
+    global time
+    count =10
     while count > 0:
       await sio.emit("countdown", count)
       count = count - 1
       await asyncio.sleep(1)
+    await run_update_json(time, True, True)
+    history_data = run_package_json()
+    pictures_data = run_package_pictures()
+    await sio.emit("history", history_data)
+    await sio.emit("pictures", pictures_data)
+    await sio.disconnect()
+    sys.exit(1)
 
   async def send_emergency():
+    global time
     while True:
       if emergency:
         break
@@ -164,6 +177,13 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
     print("")
     print("Abort")
     print("")
+    await run_update_json(time, True, False)
+    history_data = run_package_json()
+    pictures_data = run_package_pictures()
+    await sio.emit("history", history_data)
+    await sio.emit("pictures", pictures_data)
+    await sio.disconnect()
+    sys.exit(1)
 
   sio.on("connect", connect)
   sio.on("disconnect", disconnect)
