@@ -108,16 +108,16 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
     time = datetime.now().strftime("%m-%d-%Y %H:%M:%S")
 
     print("TEMPERATURE GRABBED")
-    newDoc = run_write_json(time, T, detections, [os.getenv('LOCATION')])
-    newPicture = run_write_pictures(time, frame_b64)
+    newDoc = await run_write_json(time, T, detections, [os.getenv('LOCATION')])
+    #newPicture = run_write_pictures(time, frame_b64)
 
 
-    print("PICTURE AND HISTORY WRITTEN")
-    await sio.emit("emergency", True)
-    run_sms(picture, T, time, detections)
+    #print("PICTURE AND HISTORY WRITTEN")
+    #await sio.emit("emergency", True)
+    #run_sms(picture, T, time, detections)
 
-    await sio.emit("pictures", newPicture)
     await sio.emit("history", newDoc)
+    #await sio.emit("pictures", newPicture)
 
   
     

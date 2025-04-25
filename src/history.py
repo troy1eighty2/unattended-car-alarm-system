@@ -1,4 +1,5 @@
 import json
+import aiofiles
 
 def run_update_json(timestamp, resolved, authorities):
 
@@ -16,9 +17,9 @@ def run_update_json(timestamp, resolved, authorities):
 
   return data
 
-def run_write_json(timestamp, temperature, subjects, location):
+async def run_write_json(timestamp, temperature, subjects, location):
   data = {
-    "timestamp" : timestamp,
+    "timestamp": timestamp,
     "occupant_detected": subjects,
     "location": location,
     "temperature_farenheit": temperature,
@@ -26,31 +27,35 @@ def run_write_json(timestamp, temperature, subjects, location):
     "authorities": False
   }
 
-  with open("data/history.json", "r+") as f:
-    array = json.load(f)
-    array.append(data)
+  filepath = "data/history.json"
 
-    f.seek(0)
+  async with aiofiles.open(filepath, "r") as f:
+    contents = await f.read()
+    array = json.loads(contents)
 
-    json.dump(array, f, indent=2)
-    f.truncate()
+  array.append(data)
+
+  async with aiofiles.open(filepath, "w") as f:
+    await f.write(json.dumps(array, indent=2))
 
   return array
 
-def run_write_pictures(timestamp, image):
+async def run_write_pictures(timestamp, image):
   data = {
-    "timestamp" : timestamp,
+    "timestamp": timestamp,
     "image": image
   }
 
-  with open("data/pictures.json", "r+") as f:
-    array = json.load(f)
-    array.append(data)
+  filepath = "data/pictures.json"
 
-    f.seek(0)
+  async with aiofiles.open(filepath, "r") as f:
+    contents = await f.read()
+    array = json.loads(contents)
 
-    json.dump(array, f, indent=2)
-    f.truncate()
+  array.append(data)
+
+  async with aiofiles.open(filepath, "w") as f:
+    await f.write(json.dumps(array, indent=2))
 
   return array
 
