@@ -1,66 +1,6 @@
 [
   {
-    "timestamp": "04-15-2025 16:48:00",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 82.94,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-15-2025 16:48:14",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 82.94,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-15-2025 16:48:26",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 82.94,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-15-2025 16:48:39",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 82.94,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-15-2025 18:41:35",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 79.88,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-15-2025 19:20:39",
+    "timestamp": "04-24-2025 23:51:11",
     "occupant_detected": [
       "person"
     ],
@@ -72,151 +12,79 @@
     "authorities": false
   },
   {
-    "timestamp": "04-15-2025 19:40:36",
+    "timestamp": "04-25-2025 00:00:36",
     "occupant_detected": [
       "person"
     ],
     "location": [
       "46.8611, -113.9825"
     ],
-    "temperature_farenheit": 81.32,
+    "temperature_farenheit": 81.14,
     "resolved": false,
     "authorities": false
   },
   {
-    "timestamp": "04-15-2025 19:48:09",
+    "timestamp": "04-25-2025 00:02:34",
     "occupant_detected": [
       "person"
     ],
     "location": [
       "46.8611, -113.9825"
     ],
-    "temperature_farenheit": 81.68,
+    "temperature_farenheit": 81.14,
     "resolved": false,
     "authorities": false
   },
   {
-    "timestamp": "04-15-2025 19:54:14",
+    "timestamp": "04-25-2025 00:03:52",
     "occupant_detected": [
       "person"
     ],
     "location": [
       "46.8611, -113.9825"
     ],
-    "temperature_farenheit": 81.68,
+    "temperature_farenheit": 81.14,
     "resolved": false,
     "authorities": false
   },
   {
-    "timestamp": "04-15-2025 19:59:24",
-    "occupant_detected": [
-      "cat"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 81.5,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-15-2025 20:02:09",
+    "timestamp": "04-25-2025 00:09:26",
     "occupant_detected": [
       "person"
     ],
     "location": [
       "46.8611, -113.9825"
     ],
-    "temperature_farenheit": 80.96,
+    "temperature_farenheit": 81.14,
     "resolved": false,
     "authorities": false
   },
   {
-    "timestamp": "04-15-2025 20:11:53",
+    "timestamp": "04-25-2025 00:14:39",
     "occupant_detected": [
       "person"
     ],
     "location": [
       "46.8611, -113.9825"
     ],
-    "temperature_farenheit": 82.22,
+    "temperature_farenheit": 81.14,
     "resolved": false,
     "authorities": false
   },
   {
-    "timestamp": "04-24-2025 14:46:34",
+    "timestamp": "04-25-2025 00:33:50",
     "occupant_detected": [
       "person"
     ],
     "location": [
       "46.8611, -113.9825"
     ],
-    "temperature_farenheit": 5,
+    "temperature_farenheit": 80.42,
     "resolved": false,
     "authorities": false
   },
   {
-    "timestamp": "04-24-2025 15:01:57",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 79.7,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 15:04:28",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 79.52,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 15:31:33",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 79.34,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 15:32:59",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 79.52,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 15:33:37",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 79.7,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 15:55:44",
+    "timestamp": "04-25-2025 00:37:41",
     "occupant_detected": [
       "person"
     ],
@@ -224,114 +92,6 @@
       "46.8611, -113.9825"
     ],
     "temperature_farenheit": 80.24,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 23:09:51",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 80.96,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 23:10:08",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 80.96,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 23:10:19",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 80.96,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 23:36:18",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 80.96,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 23:36:30",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 80.96,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 23:38:01",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 81.14,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 23:38:33",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 81.14,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 23:40:26",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 81.14,
-    "resolved": false,
-    "authorities": false
-  },
-  {
-    "timestamp": "04-24-2025 23:40:49",
-    "occupant_detected": [
-      "person"
-    ],
-    "location": [
-      "46.8611, -113.9825"
-    ],
-    "temperature_farenheit": 81.14,
     "resolved": false,
     "authorities": false
   }

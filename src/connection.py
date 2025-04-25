@@ -86,7 +86,11 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
     await sio.emit("config", [os.getenv('LOCATION'), os.getenv('GPS_CONNECTION_STRENGTH')])
 
   async def countdown():
-    pass
+    count =300
+    while count > 0:
+      await sio.emit("countdown", count)
+      count = count - 1
+      await asyncio.sleep(1)
 
   async def send_emergency():
     while True:
@@ -112,12 +116,13 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
     newPicture = await run_write_pictures(time, frame_b64)
 
 
-    #print("PICTURE AND HISTORY WRITTEN")
-    #await sio.emit("emergency", True)
-    #run_sms(picture, T, time, detections)
+    print("PICTURE AND HISTORY WRITTEN")
+    await sio.emit("emergency", True)
+    run_sms(picture, T, time, detections)
 
     await sio.emit("history", newDoc)
     await sio.emit("pictures", newPicture)
+    await countdown()
 
   
     
@@ -153,6 +158,12 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
 
   async def message(data):
     print(f"Message from Server: {data}")
+
+  @sio.event
+  async def pi_abort(data):
+    print("")
+    print("Abort")
+    print("")
 
   sio.on("connect", connect)
   sio.on("disconnect", disconnect)
