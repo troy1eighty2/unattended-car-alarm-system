@@ -109,7 +109,7 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
 
     print("TEMPERATURE GRABBED")
     newDoc = await run_write_json(time, T, detections, [os.getenv('LOCATION')])
-    #newPicture = run_write_pictures(time, frame_b64)
+    newPicture = await run_write_pictures(time, frame_b64)
 
 
     #print("PICTURE AND HISTORY WRITTEN")
@@ -117,7 +117,7 @@ async def run_client(ai_queue, temp_queue, cpu_temp_queue, wifi_queue, detection
     #run_sms(picture, T, time, detections)
 
     await sio.emit("history", newDoc)
-    #await sio.emit("pictures", newPicture)
+    await sio.emit("pictures", newPicture)
 
   
     
